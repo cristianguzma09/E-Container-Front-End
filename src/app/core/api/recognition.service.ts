@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, switchMap, takeWhile, timer } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { toParams } from './http-params';
@@ -27,6 +27,14 @@ export class RecognitionService {
 
   get(jobId: string): Observable<RecognitionJob> {
     return this.http.get<RecognitionJob>(`${this.base}/${jobId}`);
+  }
+
+  /** Emits the job on every poll and completes once the engine is done with it. */
+  watch(jobId: string, everyMs = 1500): Observable<RecognitionJob> {
+    return timer(0, everyMs).pipe(
+      switchMap(() => this.get(jobId)),
+      takeWhile((job) => job.status === 'PENDING' || job.status === 'PROCESSING', true),
+    );
   }
 
   list(filter: Page & { status?: JobStatus } = {}): Observable<RecognitionJob[]> {
