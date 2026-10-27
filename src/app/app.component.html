@@ -1,0 +1,12 @@
+<header class="topbar">
+  <span class="brand">E-Container</span>
+  <nav>
+    @for (item of nav; track item.path) {
+      <a [routerLink]="item.path" routerLinkActive="active">{{ item.label }}</a>
+    }
+  </nav>
+</header>
+
+<main>
+  <router-outlet />
+</main>
